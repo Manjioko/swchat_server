@@ -1,0 +1,17 @@
+{
+  "name": "swchat_server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.19.1",
+    "busboy": "^1.0.0",
+    "express": "4",
+    "mongoose": "^6.1.3",
+    "multer": "^1.4.4",
+    "socket.io": "^4.4.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
