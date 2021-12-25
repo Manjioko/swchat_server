@@ -19,6 +19,8 @@ const fileHandle = require("./utils/filehandle")
 const createIdModel = require("./utils/createidhandle")
 // 查验账号密码正确与否
 const logincheck = require("./utils/logincheck")
+// 查找好友
+const addfriend = require("./utils/addfriend")
 
 const { log } = console
 
@@ -84,6 +86,8 @@ app.post("/registerandlogin", async (req, res) => {
 app.post("/getfriend",(req,res) => {
   console.log("get friend:")
   console.log(req.body)
+  let {friendname,userid } = req.body
+  addfriend(friendname,userid)
   res.send("ok")
 })
 
