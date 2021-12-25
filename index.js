@@ -61,10 +61,10 @@ app.post("/registerandlogin", async (req, res) => {
     // 创建新用户ID表
     createIdModel({userid: usermsg.id})
     // 在public下创建相应的id文件夹
-    fileHandle(`public/${usermsg.id}`)
-    fileHandle(`public/${usermsg.id}/avatar`)
-    fileHandle(`public/${usermsg.id}/image`)
-    fileHandle(`public/${usermsg.id}/video`)
+    await fileHandle(`public/${usermsg.id}`)
+    await fileHandle(`public/${usermsg.id}/avatar`)
+    await fileHandle(`public/${usermsg.id}/image`)
+    await fileHandle(`public/${usermsg.id}/video`)
     res.send({
       success: true,
       userid: usermsg.id
@@ -79,6 +79,12 @@ app.post("/registerandlogin", async (req, res) => {
       correct:isCorrect
     })
   }
+})
+
+app.post("/getfriend",(req,res) => {
+  console.log("get friend:")
+  console.log(req.body)
+  res.send("ok")
 })
 
 // 测试所需

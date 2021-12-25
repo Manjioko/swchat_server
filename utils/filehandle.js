@@ -14,7 +14,6 @@ function isFileExisted(handleName) {
 
 async function createDir(path) {
     let isExist = await isFileExisted(path)
-    console.log(isExist)
     if(!isExist) {
         fs.mkdir(path, err => {
             if(!err) {

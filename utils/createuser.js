@@ -1,5 +1,4 @@
-// db
-const { userMsgModel } = require("../db/mongodb")
+const { userMsgModel } = require("../db/schema_model")
 // create unique id
 const uniqueid = require("./uniqueid")
 

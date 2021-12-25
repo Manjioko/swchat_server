@@ -1,5 +1,5 @@
 // db
-const { userMsgModel } = require("../db/mongodb")
+const { userMsgModel } = require("../db/schema_model")
 const { log } = console
 
 function loginChecked(name,pw) {
@@ -7,10 +7,10 @@ function loginChecked(name,pw) {
         userMsgModel.find({ username: name,password:pw }, (err, isCorrect) => {
             if (!err) {
                 if (isCorrect?.length) {
-                    log(`${name} 账号密码正确`)
+                    log(`用户 ${name} 账号密码正确`)
                     resolve(true)
                 } else {
-                    log(`${name} 账号或密码错误`)
+                    log(`用户 ${name} 账号或密码错误`)
                     resolve(false)
                 }
             } else {

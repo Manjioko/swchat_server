@@ -1,35 +1,7 @@
-const { Schema, mongoose } = require("../db/mongodb")
-
+const { mongoose } = require("../db/mongodb")
+const { idModelSchema } = require("../db/schema_model")
 const { log } = console
 
-
-const idModelSchema = new Schema({
-    userid: String,
-    friendidarray: {
-        type: [String],
-        default: []
-    },
-    chat: {
-        type: [{
-            roomid: String,
-            userid: String,
-            clientid: String,
-            time: Number,
-            content: String,
-            self: Boolean
-        }],
-        default: []
-    },
-})
-
-const chatMsg = new Schema({
-    roomid: String,
-    userid: String,
-    clientid: String,
-    time: Number,
-    content: String,
-    self: Boolean
-})
 
 
 function createIdModel(model) {
