@@ -21,6 +21,8 @@ const createIdModel = require("./utils/createidhandle")
 const logincheck = require("./utils/logincheck")
 // 查找好友
 const addfriend = require("./utils/addfriend")
+// 获取好友列表
+const friendlist = require("./utils/getmyfriendlist")
 
 const { log } = console
 
@@ -67,6 +69,7 @@ app.post("/registerandlogin", async (req, res) => {
     await fileHandle(`public/${usermsg.id}/avatar`)
     await fileHandle(`public/${usermsg.id}/image`)
     await fileHandle(`public/${usermsg.id}/video`)
+    fs.writeFileSync(`public/${usermsg.id}/avatar/${usermsg.id}_avatar.jpg`, fs.readFileSync('public/default_avatar.jpg'))
     res.send({
       success: true,
       userid: usermsg.id
@@ -83,23 +86,35 @@ app.post("/registerandlogin", async (req, res) => {
   }
 })
 
-app.post("/getfriend",(req,res) => {
-  console.log("get friend:")
-  console.log(req.body)
+app.post("/getfriend", async (req,res) => {
   let {friendname,userid } = req.body
-  addfriend(friendname,userid)
-  res.send("ok")
+  let addfriendResult = await addfriend(friendname,userid)
+  res.send(addfriendResult)
 })
+
+
+app.post("/getmyfriendlist", async (req,res) => {
+  let { userid } = req.body
+  let result = ''
+  if(userid) {
+    // log(userid)
+    result = await friendlist(userid)
+  }
+  res.send(result)
+})
+
 
 // 测试所需
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
+    // console.log(req)
     cb(null, './public');
   },
   filename: function (req, file, cb) {
     cb(null, `${file.originalname}`)
   }
 })
+// console.log(storage)
 const upload = multer({ storage: storage });
 
 // 测试

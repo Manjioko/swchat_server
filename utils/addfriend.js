@@ -2,12 +2,22 @@ const { mongoose } = require("../db/mongodb")
 const { userMsgModel, idModelSchema } = require("../db/schema_model")
 const { log } = console
 
-
+/*
+    @返回值为 {
+        addfriend：boolean,
+        why: number,
+        adduserid: string
+    }
+    @ 其中， addfriend 确认添加好友是否成功， 成功返回true, 失败返回false
+    @ 其中， why 返回失败原因， 0 是代表添加本身的账号， 1 是代表添加的用户不存在
+    @ 2 是代表添加操作成功 3 是代表添加已经存在于自己好友列表的好友
+    @ 其中， adduserid 是添加好友成功后返回好友的 userid
+*/ 
 
 
 async function addfriendHandle(friendname, myid) {
     let finduser = await findFriendUser(friendname, myid);
-    console.log(finduser)
+    // console.log(finduser)
     if (finduser?.addfriend) {
         let adduserid = finduser.adduserid
         let friendArr = await findMyFriendArray(myid, adduserid,friendname)
@@ -32,7 +42,7 @@ function findFriendUser(friendname, myid) {
                             addfriend: false,
                             // 0 代表加的是自己
                             why: 0,
-                            adduserid: adduserid
+                            adduserid: null
                         })
                     }
                     resolve({
@@ -69,7 +79,7 @@ function findMyFriendArray(myid,adduserid,friendname) {
                     resolve({
                         addfriend: true,
                         why: 2,
-                        adduserid: null
+                        adduserid: adduserid
                     })
                     
                 } else {
@@ -91,11 +101,23 @@ function findMyFriendArray(myid,adduserid,friendname) {
 
 function updateFriendArray(myid,adduserid) {
     return new Promise((resolve,reject) => {
+        let friendidModel = mongoose.model(adduserid, idModelSchema, adduserid)
+        // 好友的数据库更新
+        friendidModel.updateOne({ userid: adduserid }, { $push: { friendidarray: myid } }, (isPushErr, isPush) => {
+            if (!isPushErr) {
+                log(`好友数据库更新成功`)
+                log(isPush)
+            } else {
+                log(`好友数据库更新失败,原因是: ${isPushErr}`)
+            }
+        })
+
         let idModel = mongoose.model(myid, idModelSchema, myid)
         // 自己的数据库更新
-        idModel.update({ userid: myid }, { $push: { friendidarray: adduserid } }, (isPushErr, isPush) => {
+        idModel.updateOne({ userid: myid }, { $push: { friendidarray: adduserid } }, (isPushErr, isPush) => {
             if (!isPushErr) {
-                log(`数据库更新成功${isPush[0]}`)
+                log(`数据库更新成功`)
+                log(isPush)
                 resolve({
                     addfriend: true,
                     why: 2,
@@ -106,19 +128,6 @@ function updateFriendArray(myid,adduserid) {
             }
         })
 
-        // 好友的数据库更新
-        idModel.update({ userid: adduserid }, { $push: { friendidarray: myid } }, (isPushErr, isPush) => {
-            if (!isPushErr) {
-                log(`好友数据库更新成功${isPush[0]}`)
-                resolve({
-                    addfriend: true,
-                    why: 2,
-                    adduserid: adduserid
-                })
-            } else {
-                log(`好友数据库更新失败,原因是: ${isPushErr}`)
-            }
-        })
     })
 }
 
