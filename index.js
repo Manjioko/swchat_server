@@ -63,7 +63,7 @@ app.post("/registerandlogin", async (req, res) => {
   let usermsg = await createUser(req.body)
   if (usermsg.create) {
     // 创建新用户ID表
-    createIdModel({userid: usermsg.id})
+    createIdModel({ userid: usermsg.id })
     // 在public下创建相应的id文件夹
     await fileHandle(`public/${usermsg.id}`)
     await fileHandle(`public/${usermsg.id}/avatar`)
@@ -75,28 +75,28 @@ app.post("/registerandlogin", async (req, res) => {
       userid: usermsg.id
     })
   } else {
-    let {username,password} = req.body
-    let isCorrect = await logincheck(username,password)
+    let { username, password } = req.body
+    let isCorrect = await logincheck(username, password)
     res.send({
       success: false,
       userid: usermsg.id,
-      check:true,
-      correct:isCorrect
+      check: true,
+      correct: isCorrect
     })
   }
 })
 
-app.post("/getfriend", async (req,res) => {
-  let {friendname,userid } = req.body
-  let addfriendResult = await addfriend(friendname,userid)
+app.post("/getfriend", async (req, res) => {
+  let { friendname, userid } = req.body
+  let addfriendResult = await addfriend(friendname, userid)
   res.send(addfriendResult)
 })
 
 
-app.post("/getmyfriendlist", async (req,res) => {
+app.post("/getmyfriendlist", async (req, res) => {
   let { userid } = req.body
   let result = ''
-  if(userid) {
+  if (userid) {
     // log(userid)
     result = await friendlist(userid)
   }
@@ -123,7 +123,7 @@ app.post('/test', upload.single('key'), async (req, res) => {
   // log(req.files)
   log(req.body.userid)
   if (req?.file?.path) {
-    let isfail = await handlePicture(req.file.path,req.body.userid)
+    let isfail = await handlePicture(req.file.path, req.body.userid)
     let path;
     if (!isfail) {
       path = "http://47.242.27.76:3000/" + req.file.path
@@ -138,25 +138,26 @@ app.post('/test', upload.single('key'), async (req, res) => {
 
 io.on('connection', (socket) => {
   log('a user connected');
-  socket.join("testRoom0");
+  // socket.join("testRoom0");
   socket.on("otherSendMsg", (msg) => {
-    log(msg)
+    // log(msg)
     // socket.broadcast.emit("otherSendMsg",msg)
-    socket.to("testRoom0").emit("otherSendMsg", msg)
+    // socket.to("testRoom0").emit("otherSendMsg", msg)
   })
 
   // 创建私聊房间
   socket.on("createPrivateChatRoom", data => {
-    console.log("join ------------->")
-    console.log(data.roomid)
-    console.log(data.myid)
-    console.log(data.clientid)
+    console.log("join to " + data.roomid)
+    // socket.join(data.roomid)
   })
   // 离开私聊房间
   socket.on("deletePrivateChatRoom", data => {
-    console.log("leave ------------->")
-    // console.log(data.myid)
-    // console.log(data.clientid)
+    console.log("leave from " + data.roomid)
+  })
+
+  socket.on("privateChat", data => {
+    console.log(data)
+    socket.to(data.roomid).emit("otherSendMsg", data.chat)
   })
 });
 
