@@ -107,8 +107,8 @@ app.post("/getmyfriendlist", async (req,res) => {
 // 测试所需
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // console.log(req)
-    cb(null, './public');
+    // console.log(req.body)
+    cb(null, './public/tmp');
   },
   filename: function (req, file, cb) {
     cb(null, `${file.originalname}`)
@@ -119,8 +119,11 @@ const upload = multer({ storage: storage });
 
 // 测试
 app.post('/test', upload.single('key'), async (req, res) => {
+  log(req.file)
+  // log(req.files)
+  log(req.body.userid)
   if (req?.file?.path) {
-    let isfail = await handlePicture(req.file.path)
+    let isfail = await handlePicture(req.file.path,req.body.userid)
     let path;
     if (!isfail) {
       path = "http://47.242.27.76:3000/" + req.file.path
@@ -140,6 +143,20 @@ io.on('connection', (socket) => {
     log(msg)
     // socket.broadcast.emit("otherSendMsg",msg)
     socket.to("testRoom0").emit("otherSendMsg", msg)
+  })
+
+  // 创建私聊房间
+  socket.on("createPrivateChatRoom", data => {
+    console.log("join ------------->")
+    console.log(data.roomid)
+    console.log(data.myid)
+    console.log(data.clientid)
+  })
+  // 离开私聊房间
+  socket.on("deletePrivateChatRoom", data => {
+    console.log("leave ------------->")
+    // console.log(data.myid)
+    // console.log(data.clientid)
   })
 });
 

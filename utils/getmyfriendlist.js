@@ -11,7 +11,7 @@ function getMyFriendList(id) {
                 for (const fid of friendList) {
                     // console.log(fid)
                     let fdata = await finduser(fid)
-                    console.log(fdata)
+                    // console.log("------> " + fdata)
                     userarr.push({
                         username: fdata?.username ?? undefined,
                         userid: fdata?.userid ?? undefined,

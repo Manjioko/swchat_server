@@ -2,9 +2,11 @@ const { spawn, exec } = require("child_process");
 const fs = require('fs')
 
 
-function handlePicture(path, res) {
+function handlePicture(path, userid) {
     return new Promise((resolve, reject) => {
-        let ff = spawn('ffmpeg', ["-y", "-i", path, "-vf", "scale='400:400'", "-q", "9", path])
+        let newFilePath = `public/${userid}/avatar/${userid}_avatar.jpg`
+        console.log(`new file path is : ${newFilePath}`)
+        let ff = spawn('ffmpeg', ["-y", "-i", path, "-vf", "scale='400:400'", "-q", "9", newFilePath])
 
         ff.stdout.on("data", (data) => {
             console.log(`stdout: ${data}`);
@@ -18,6 +20,14 @@ function handlePicture(path, res) {
         });
 
         ff.on("close", (code) => {
+            try {
+                fs.unlink(path, (err) => {
+                    if (err)
+                        console.log(err)
+                })
+            } catch {
+                console.log("删除缓存文件失败")
+            }
             console.log(`子进程退出，退出码 ${code}`);
             resolve(code)
         });
