@@ -147,8 +147,12 @@ io.on('connection', (socket) => {
 
   // 创建私聊房间
   socket.on("createPrivateChatRoom", data => {
-    console.log("join to " + data.roomid)
-    // socket.join(data.roomid)
+    if(data.roomidArr) {
+      for (const id of data.roomidArr) {
+        console.log(`join to ${id}`)
+        socket.join(id)
+      }
+    }
   })
   // 离开私聊房间
   socket.on("deletePrivateChatRoom", data => {
@@ -157,7 +161,7 @@ io.on('connection', (socket) => {
 
   socket.on("privateChat", data => {
     console.log(data)
-    socket.to(data.roomid).emit("otherSendMsg", data.chat)
+    socket.to(data.roomid).emit("privateChatWithOther", data)
   })
 });
 
