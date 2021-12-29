@@ -146,13 +146,15 @@ io.on('connection', (socket) => {
   })
 
   // 创建私聊房间
-  socket.on("createPrivateChatRoom", data => {
-    if(data.roomidArr) {
-      for (const id of data.roomidArr) {
+  socket.on("createPrivateChatRoom", roomidArr => {
+    // console.log("++++++++++++++++++++++++++++++++++++")
+    if(roomidArr) {
+      for (const id of roomidArr) {
         console.log(`join to ${id}`)
         socket.join(id)
       }
     }
+    // console.log("_____________________________________")
   })
   // 离开私聊房间
   socket.on("deletePrivateChatRoom", data => {
