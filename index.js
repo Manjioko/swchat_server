@@ -26,6 +26,8 @@ const friendlist = require("./utils/getmyfriendlist")
 
 const { log } = console
 
+const chatTmp = {}
+
 
 // websocket 允许跨域
 const io = new Server(server, {
@@ -136,35 +138,67 @@ app.post('/test', upload.single('key'), async (req, res) => {
 });
 
 
-io.on('connection', (socket) => {
+// websocket 接入入口
+io.on('connection', async (socket) => {
   log('a user connected');
-  // socket.join("testRoom0");
-  socket.on("otherSendMsg", (msg) => {
-    // log(msg)
-    // socket.broadcast.emit("otherSendMsg",msg)
-    // socket.to("testRoom0").emit("otherSendMsg", msg)
+
+  // 上线后将所有好友加入私人聊天室
+  let userid = socket.handshake.query.userid
+  // 查找好友列表
+  let list = await friendlist(userid)
+  for (const l of list) {
+    let roomid = userid > l.userid ? userid + l.userid : l.userid + userid
+    // 加入私人房间
+    socket.join(roomid)
+    // log("join to " + roomid)
+  }
+
+  // 上线后发送缓存在服务器上的聊天记录
+  if(chatTmp[userid]) {
+    let chatArr = chatTmp[userid]
+    for (const chatBox of chatArr) {
+      socket.emit("testreconnect",chatBox)
+    }
+    // 删除缓存区
+    delete chatTmp[userid]
+  }
+
+
+  // 私人聊天处理平台
+  socket.on("privateChat", data => {
+    console.log(data)
+    // chatTmp[data.clientid] 存在,证明 clientid 已经离线了
+    if(chatTmp[data.clientid]) {
+      // 离线存储在服务器中
+      chatTmp[data.clientid].push(data)
+    } else {
+      // 在线则直接发送
+      socket.to(data.roomid).emit("privateChatWithOther", data)
+    }
+  })
+
+  // 监听离线,如果离线就创建一个缓存区存放聊天记录
+  socket.on("disconnecting",() => {
+    console.log(socket.handshake.query.userid + " disconnected")
+    let userid = socket.handshake.query.userid
+    chatTmp[userid] = []
   })
 
   // 创建私聊房间
-  socket.on("createPrivateChatRoom", roomidArr => {
-    // console.log("++++++++++++++++++++++++++++++++++++")
-    if(roomidArr) {
-      for (const id of roomidArr) {
-        console.log(`join to ${id}`)
-        socket.join(id)
-      }
-    }
-    // console.log("_____________________________________")
-  })
-  // 离开私聊房间
-  socket.on("deletePrivateChatRoom", data => {
-    console.log("leave from " + data.roomid)
-  })
+  // socket.on("createPrivateChatRoom", roomidArr => {
+  //   if (roomidArr) {
+  //     for (const id of roomidArr) {
+  //       console.log(`join to ${id}`)
+  //       socket.join(id)
+  //     }
+  //   }
+  // })
 
-  socket.on("privateChat", data => {
-    console.log(data)
-    socket.to(data.roomid).emit("privateChatWithOther", data)
-  })
+  // 离开私聊房间
+  // socket.on("deletePrivateChatRoom", data => {
+  //   console.log("leave from " + data.roomid)
+  // })
+
 });
 
 
