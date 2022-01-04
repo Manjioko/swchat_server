@@ -144,6 +144,7 @@ io.on('connection', async (socket) => {
 
   // 上线后将所有好友加入私人聊天室
   let userid = socket.handshake.query.userid
+  console.log(userid)
   // 查找好友列表
   let list = await friendlist(userid)
   for (const l of list) {
@@ -166,7 +167,7 @@ io.on('connection', async (socket) => {
 
   // 私人聊天处理平台
   socket.on("privateChat", data => {
-    // console.log(data)
+    console.log(data)
     // chatTmp[data.clientid] 存在,证明 clientid 已经离线了
     if(chatTmp[data.clientid]) {
       // 离线存储在服务器中
@@ -202,6 +203,6 @@ io.on('connection', async (socket) => {
 });
 
 
-server.listen(6438, () => {
-  log('http server is listening on *:6438');
+server.listen(3000, () => {
+  log('http server is listening on *:3000');
 });
