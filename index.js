@@ -157,9 +157,19 @@ io.on('connection', async (socket) => {
   // 上线后发送缓存在服务器上的聊天记录
   if(chatTmp[userid]) {
     let chatArr = chatTmp[userid]
-    for (const chatBox of chatArr) {
-      socket.emit("testreconnect",chatBox)
-    }
+    // log(chatArr)
+    setTimeout(() => {
+      for (const chatBox of chatArr) {
+        socket.emit("testreconnect",chatBox,(getReturn)=>{
+          if(getReturn) {
+            log("收到 " + getReturn)
+          } else {
+            log("没收到")
+          }
+        })
+      }
+    }, 5000);
+    
     // 删除缓存区
     delete chatTmp[userid]
   }
