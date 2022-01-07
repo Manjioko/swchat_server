@@ -23,6 +23,8 @@ const logincheck = require("./utils/logincheck")
 const addfriend = require("./utils/addfriend")
 // 获取好友列表
 const friendlist = require("./utils/getmyfriendlist")
+// 删除好友
+const deletefriend = require('./utils/deletefriend')
 
 const { log } = console
 
@@ -94,6 +96,18 @@ app.post("/getfriend", async (req, res) => {
   res.send(addfriendResult)
 })
 
+app.post("/removefriend", async (req, res) => {
+  // console.log(req.body)
+  let myid = req.body.userid
+  let clientid = req.body.clientid
+  let isSucess = await deletefriend(myid,clientid)
+  res.send(isSucess)
+})
+
+app.post("/remarkfriend", async (req, res) => {
+  console.log(req.body)
+  res.send("ok")
+})
 
 app.post("/getmyfriendlist", async (req, res) => {
   let { userid } = req.body

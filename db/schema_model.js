@@ -31,6 +31,7 @@ const idModelSchema = new Schema({
     },
 })
 
+idModelSchema.add({alias:String})
 
 module.exports = {
     userMsgModel, // 用户登陆模型
