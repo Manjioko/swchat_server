@@ -31,7 +31,15 @@ const idModelSchema = new Schema({
     },
 })
 
-idModelSchema.add({alias:String})
+idModelSchema.add({
+    alias: {
+        type: [{
+            clientid: String,
+            alias: String
+        }],
+        default: []
+    }
+})
 
 module.exports = {
     userMsgModel, // 用户登陆模型

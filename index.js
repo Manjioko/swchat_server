@@ -25,7 +25,8 @@ const addfriend = require("./utils/addfriend")
 const friendlist = require("./utils/getmyfriendlist")
 // 删除好友
 const deletefriend = require('./utils/deletefriend')
-
+// 添加好友备注
+const friendalias = require('./utils/friendalias')
 const { log } = console
 
 const chatTmp = {}
@@ -100,13 +101,15 @@ app.post("/removefriend", async (req, res) => {
   // console.log(req.body)
   let myid = req.body.userid
   let clientid = req.body.clientid
-  let isSucess = await deletefriend(myid,clientid)
+  let isSucess = await deletefriend(myid, clientid)
   res.send(isSucess)
 })
 
 app.post("/remarkfriend", async (req, res) => {
   console.log(req.body)
-  res.send("ok")
+  let { clientid, clientAlias, userid } = req.body
+  let isSucess = await friendalias(userid, clientid, clientAlias)
+  res.send(isSucess)
 })
 
 app.post("/getmyfriendlist", async (req, res) => {
@@ -169,13 +172,13 @@ io.on('connection', async (socket) => {
   }
 
   // 上线后发送缓存在服务器上的聊天记录
-  if(chatTmp[userid]) {
+  if (chatTmp[userid]) {
     let chatArr = chatTmp[userid]
     // log(chatArr)
     setTimeout(() => {
       for (const chatBox of chatArr) {
-        socket.emit("testreconnect",chatBox,(getReturn)=>{
-          if(getReturn) {
+        socket.emit("testreconnect", chatBox, (getReturn) => {
+          if (getReturn) {
             log("收到 " + getReturn)
           } else {
             log("没收到")
@@ -183,7 +186,7 @@ io.on('connection', async (socket) => {
         })
       }
     }, 5000);
-    
+
     // 删除缓存区
     delete chatTmp[userid]
   }
@@ -193,7 +196,7 @@ io.on('connection', async (socket) => {
   socket.on("privateChat", data => {
     console.log(data)
     // chatTmp[data.clientid] 存在,证明 clientid 已经离线了
-    if(chatTmp[data.clientid]) {
+    if (chatTmp[data.clientid]) {
       // 离线存储在服务器中
       chatTmp[data.clientid].push(data)
     } else {
@@ -203,7 +206,7 @@ io.on('connection', async (socket) => {
   })
 
   // 监听离线,如果离线就创建一个缓存区存放聊天记录
-  socket.on("disconnecting",() => {
+  socket.on("disconnecting", () => {
     console.log(socket.handshake.query.userid + " disconnected")
     let userid = socket.handshake.query.userid
     chatTmp[userid] = []
