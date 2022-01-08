@@ -106,7 +106,7 @@ app.post("/removefriend", async (req, res) => {
 })
 
 app.post("/remarkfriend", async (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
   let { clientid, clientAlias, userid } = req.body
   let isSucess = await friendalias(userid, clientid, clientAlias)
   res.send(isSucess)
