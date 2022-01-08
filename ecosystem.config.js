@@ -3,8 +3,8 @@ module.exports = {
     name   : "swchat",
     script : "./index.js",
     cwd:"./",
-    instances : "max",
-    exec_mode : "cluster",
+    // instances : "max",
+    // exec_mode : "cluster",
     watch: [  // 监控变化的目录，一旦变化，自动重启
       "utils",
       "db",
