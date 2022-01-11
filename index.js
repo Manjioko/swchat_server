@@ -171,25 +171,30 @@ io.on('connection', async (socket) => {
     // log("join to " + roomid)
   }
 
-  // 上线后发送缓存在服务器上的聊天记录
-  if (chatTmp[userid]) {
-    let chatArr = chatTmp[userid]
-    // log(chatArr)
-    setTimeout(() => {
-      for (const chatBox of chatArr) {
-        socket.emit("testreconnect", chatBox, (getReturn) => {
-          if (getReturn) {
-            log("收到 " + getReturn)
-          } else {
-            log("没收到")
+  socket.on("getDisconnectChatMsg", isGet => {
+    console.log("getDisconnectChatMsg")
+    if (isGet) {
+      // 上线后发送缓存在服务器上的聊天记录
+      if (chatTmp[userid]) {
+        let chatArr = chatTmp[userid]
+        // log(chatArr)
+        setTimeout(() => {
+          for (const chatBox of chatArr) {
+            socket.emit("testreconnect", chatBox, (getReturn) => {
+              if (getReturn) {
+                log("收到 " + getReturn)
+              } else {
+                log("没收到")
+              }
+            })
           }
-        })
-      }
-    }, 5000);
+        }, 5000);
 
-    // 删除缓存区
-    delete chatTmp[userid]
-  }
+        // 删除缓存区
+        delete chatTmp[userid]
+      }
+    }
+  })
 
 
   // 私人聊天处理平台
