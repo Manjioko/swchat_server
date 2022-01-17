@@ -3,6 +3,7 @@ node_modules
 /dist
 logs
 public
+assets
 
 
 # local env files

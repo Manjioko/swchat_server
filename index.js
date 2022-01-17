@@ -1,13 +1,38 @@
 const express = require('express');
 const path = require("path");
 const app = express();
-const http = require('http');
-const server = http.createServer(app);
+// http
+// const http = require('http');
+// const server = http.createServer(app);
+
+// https
+const { createServer } = require("https");
+
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const child = require("child_process");
 const fs = require('fs')
 const { Server } = require("socket.io");
+
+// https
+const httpsServer = createServer({
+  key: fs.readFileSync('assets/swchat.xyz.key'),
+  cert: fs.readFileSync('assets/swchat.xyz_bundle.crt')
+},app);
+
+// websocket 允许跨域 http
+// const io = new Server(server, {
+//   cors: {
+//     origin: '*'
+//   }
+// });
+
+// websocket 允许跨域 https
+const io = new Server(httpsServer, {
+  cors: {
+    origin: '*'
+  }
+});
 
 // 用户头像压缩
 const handlePicture = require("./utils/mediahandle")
@@ -31,13 +56,6 @@ const { log } = console
 
 const chatTmp = {}
 
-
-// websocket 允许跨域
-const io = new Server(server, {
-  cors: {
-    origin: '*'
-  }
-});
 
 
 
@@ -234,7 +252,12 @@ io.on('connection', async (socket) => {
 
 });
 
+//http
+// server.listen(3000, () => {
+//   log('http server is listening on *:3000');
+// });
 
-server.listen(3000, () => {
-  log('http server is listening on *:3000');
+// https
+httpsServer.listen(3000, () => {
+  log('https server is listening on *:3000');
 });
