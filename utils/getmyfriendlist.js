@@ -9,13 +9,19 @@ function getMyFriendList(id) {
                 let friendList = data.friendidarray
                 let userarr = []
                 for (const fid of friendList) {
-                    // console.log(fid)
                     let fdata = await finduser(fid)
-                    // console.log("------> " + fdata)
+                    // 找到相应的昵称
+                    let alias;
+                    if(data.alias) {
+                        data.alias.forEach(e => {
+                            e["clientid"] === fid ? alias = e["alias"] : ''
+                        });
+                    }
                     userarr.push({
                         username: fdata?.username ?? undefined,
                         userid: fdata?.userid ?? undefined,
-                        avatar: `http://203.174.57.179:3000/public/${fdata?.userid}/avatar/${fdata?.userid}_avatar.jpg`
+                        avatar: `http://203.174.57.179:3000/public/${fdata?.userid}/avatar/${fdata?.userid}_avatar.jpg`,
+                        alias: alias
                     })
 
                 }
