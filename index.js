@@ -18,7 +18,7 @@ const { Server } = require("socket.io");
 const httpsServer = createServer({
   key: fs.readFileSync('assets/swchat.xyz.key'),
   cert: fs.readFileSync('assets/swchat.xyz_bundle.crt')
-},app);
+}, app);
 
 // websocket 允许跨域 http
 // const io = new Server(server, {
@@ -216,7 +216,7 @@ io.on('connection', async (socket) => {
 
 
   // 私人聊天处理平台
-  socket.on("privateChat", data => {
+  socket.on("privateChat", (data, cb) => {
     console.log(data)
     // chatTmp[data.clientid] 存在,证明 clientid 已经离线了
     if (chatTmp[data.clientid]) {
@@ -226,6 +226,7 @@ io.on('connection', async (socket) => {
       // 在线则直接发送
       socket.to(data.roomid).emit("privateChatWithOther", data)
     }
+    cb("privateChat success get data.")
   })
 
   // 监听离线,如果离线就创建一个缓存区存放聊天记录
