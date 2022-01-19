@@ -6,7 +6,7 @@ function getMyFriendList(id) {
         let idModel = mongoose.model(id,idModelSchema,id)
         idModel.findOne({userid: id}, async (err, data) => {
             if(!err) {
-                let friendList = data.friendidarray
+                let friendList = data?.friendidarray ?? []
                 let userarr = []
                 for (const fid of friendList) {
                     let fdata = await finduser(fid)

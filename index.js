@@ -176,6 +176,7 @@ app.post('/test', upload.single('key'), async (req, res) => {
 // websocket 接入入口
 io.on('connection', async (socket) => {
   log('a user connected');
+  log(`The user socket id is : ${socket.id}`)
 
   // 上线后将所有好友加入私人聊天室
   let userid = socket.handshake.query.userid
