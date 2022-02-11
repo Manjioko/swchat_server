@@ -1,6 +1,6 @@
 module.exports = {
   apps : [{
-    name   : "swchat",
+    name   : "swchat_mqtt_server",
     script : "./index.js",
     cwd:"./",
     // instances : "max",
@@ -8,7 +8,7 @@ module.exports = {
     watch: [  // 监控变化的目录，一旦变化，自动重启
       "utils",
       "db",
-      "./index.js",
+      "index.js",
       "dist"
     ],
     ignore_watch : [  // 从监控目录中排除

@@ -1,38 +1,19 @@
 const express = require('express');
 const path = require("path");
 const app = express();
-// http
-// const http = require('http');
-// const server = http.createServer(app);
-
-// https
-const { createServer } = require("https");
-
+const fs = require('fs');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const child = require("child_process");
-const fs = require('fs')
-const { Server } = require("socket.io");
-
+// mqtt 服务器
+const mosca = require('mosca')
 // https
+const { createServer } = require("https");
+// https server
 const httpsServer = createServer({
   key: fs.readFileSync('assets/swchat.xyz.key'),
   cert: fs.readFileSync('assets/swchat.xyz_bundle.crt')
 }, app);
-
-// websocket 允许跨域 http
-// const io = new Server(server, {
-//   cors: {
-//     origin: '*'
-//   }
-// });
-
-// websocket 允许跨域 https
-const io = new Server(httpsServer, {
-  cors: {
-    origin: '*'
-  }
-});
 
 // 用户头像压缩
 const handlePicture = require("./utils/mediahandle")
@@ -54,7 +35,56 @@ const deletefriend = require('./utils/deletefriend')
 const friendalias = require('./utils/friendalias')
 const { log } = console
 
-const chatTmp = {}
+
+const ascoltatore = {
+  //using ascoltatore
+  type: 'mongo',
+  url: 'mongodb://localhost:27017/mqtt',
+  pubsubCollection: 'ascoltatori',
+  mongo: {}
+};
+
+const moscaSettings = {
+  port: 1884,
+  backend: ascoltatore,
+  persistence: {
+    factory: mosca.persistence.Mongo,
+    url: 'mongodb://localhost:27017/mqtt'
+  },
+};
+// 启动MQTT服务器
+const MQTTserver = new mosca.Server(moscaSettings);
+// https websocket 化 mqtt
+MQTTserver.attachHttpServer(httpsServer)
+
+
+// MQTT操作
+MQTTserver.on('ready', () => {
+  console.log('Mosca MQTTserver is up and running on *:1884')
+});
+
+MQTTserver.on('clientDisconnected', function (client) {
+  console.log('clientDisconnected: ', client.id);
+});
+
+MQTTserver.on('clientConnected', function (client) {
+  console.log('client connected: ', client.id);
+});
+
+// fired when a message is received
+MQTTserver.on('published', function (packet, client) {
+  console.log('Published', packet.payload.toString());
+});
+
+MQTTserver.on("subscribed",function(topic,client) {
+  console.log(`The ${client.id} has subscribed the topic: ${topic}`)
+})
+
+MQTTserver.on("unsubscribed",function(topic,client) {
+  console.log(`The ${client.id} has *unSubscribed* the topic: ${topic}`)
+})
+
+
 
 
 
@@ -172,94 +202,7 @@ app.post('/test', upload.single('key'), async (req, res) => {
   }
 });
 
-
-// websocket 接入入口
-io.on('connection', async (socket) => {
-  log('a user connected');
-  log(`The user socket id is : ${socket.id}`)
-
-  // 上线后将所有好友加入私人聊天室
-  let userid = socket.handshake.query.userid
-  console.log(userid)
-  // 查找好友列表
-  let list = await friendlist(userid)
-  for (const l of list) {
-    let roomid = userid > l.userid ? userid + l.userid : l.userid + userid
-    // 加入私人房间
-    socket.join(roomid)
-    // log("join to " + roomid)
-  }
-
-  socket.on("getDisconnectChatMsg", isGet => {
-    console.log("getDisconnectChatMsg")
-    if (isGet) {
-      // 上线后发送缓存在服务器上的聊天记录
-      if (chatTmp[userid]) {
-        let chatArr = chatTmp[userid]
-        // log(chatArr)
-        setTimeout(() => {
-          for (const chatBox of chatArr) {
-            socket.emit("testreconnect", chatBox, (getReturn) => {
-              if (getReturn) {
-                log("收到 " + getReturn)
-              } else {
-                log("没收到")
-              }
-            })
-          }
-        }, 5000);
-
-        // 删除缓存区
-        delete chatTmp[userid]
-      }
-    }
-  })
-
-
-  // 私人聊天处理平台
-  socket.on("privateChat", (data, cb) => {
-    console.log(data)
-    // chatTmp[data.clientid] 存在,证明 clientid 已经离线了
-    if (chatTmp[data.clientid]) {
-      // 离线存储在服务器中
-      chatTmp[data.clientid].push(data)
-    } else {
-      // 在线则直接发送
-      socket.to(data.roomid).emit("privateChatWithOther", data)
-    }
-    cb("privateChat success get data.")
-  })
-
-  // 监听离线,如果离线就创建一个缓存区存放聊天记录
-  socket.on("disconnecting", () => {
-    console.log(socket.handshake.query.userid + " disconnected")
-    let userid = socket.handshake.query.userid
-    chatTmp[userid] = []
-  })
-
-  // 创建私聊房间
-  // socket.on("createPrivateChatRoom", roomidArr => {
-  //   if (roomidArr) {
-  //     for (const id of roomidArr) {
-  //       console.log(`join to ${id}`)
-  //       socket.join(id)
-  //     }
-  //   }
-  // })
-
-  // 离开私聊房间
-  // socket.on("deletePrivateChatRoom", data => {
-  //   console.log("leave from " + data.roomid)
-  // })
-
-});
-
-//http
-// server.listen(3000, () => {
-//   log('http server is listening on *:3000');
-// });
-
 // https
-httpsServer.listen(3000, () => {
-  log('https server is listening on *:3000');
+httpsServer.listen(6438, () => {
+  console.log('https server is listening on *:6438');
 });
