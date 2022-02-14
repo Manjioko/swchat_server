@@ -20,7 +20,7 @@ function getMyFriendList(id) {
                     userarr.push({
                         username: fdata?.username ?? undefined,
                         userid: fdata?.userid ?? undefined,
-                        avatar: `https://www.swchat.xyz:3000/public/${fdata?.userid}/avatar/${fdata?.userid}_avatar.jpg`,
+                        avatar: `https://www.swchat.xyz:6438/public/${fdata?.userid}/avatar/${fdata?.userid}_avatar.jpg`,
                         alias: alias
                     })
 
